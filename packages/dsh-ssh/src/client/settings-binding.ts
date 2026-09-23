@@ -161,5 +161,13 @@ export function bindSettingsReader<T>(ctx: ClientContext, namespace: string, fie
       dispose: () => {},
     }
   }
-  return new SharedFormsReader<T>(ctx.configForms, field)
+  const forms = ctx.get('configForms') as ConfigForms | undefined
+  if (forms !== undefined) {
+    return new SharedFormsReader<T>(forms, field)
+  }
+  return {
+    getSnapshot: () => PENDING_SNAPSHOT as ConfigFormSnapshot<T>,
+    subscribe: () => () => {},
+    dispose: () => {},
+  }
 }

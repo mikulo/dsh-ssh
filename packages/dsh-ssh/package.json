@@ -28,7 +28,7 @@
   },
   "dsh": {
     "engines": {
-      "dsh": ">=0.1.7-alpha.2"
+      "dsh": ">=0.1.7-alpha.1"
     },
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -58,7 +58,7 @@
     "ws": "^8.18.0"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh": ">=0.1.7-alpha.2",
+    "@deepseek-ai/dsh": ">=0.1.7-alpha.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -102,6 +102,6 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zhu1090093659/dsh-web.git"
+    "url": "https://github.com/mikulo/dsh-ssh.git"
   }
 }

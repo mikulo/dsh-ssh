@@ -54,7 +54,11 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
   }
 }
 
-/** Required services (fiber inject waiting — the runtime must be up first). */
+/**
+ * Required services. DSH 0.1.7-alpha.1 removed `settingsScope` and now
+ * publishes `configForms` from ui-settings (deepseek-harness#7445). Waiting
+ * on the old name leaves this entry pending and fails web boot.
+ */
 export const inject = ['slots', 'locale', 'configForms']
 
 /** Type-only surface (export discipline: no value exports beyond the plugin contract). */

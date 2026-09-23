@@ -79,7 +79,7 @@ export interface ResolvedConfig {
  * a running instance without a remount: the loader commits the new value into
  * the field's reference and announces `loader/volatile-update` on this fiber.
  */
-export const Config = z.object({
+export const Config: z<Config> = z.object({
   announceToAgent: z.boolean().default(false).volatile(),
   enabled: z.boolean().default(true).volatile(),
   terminalFontFamily: z.string().default('').volatile(),
