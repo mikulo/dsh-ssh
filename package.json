@@ -1,79 +1,113 @@
 {
-  "name": "dsh-web",
-  "version": "0.1.1",
-  "private": true,
-  "description": "DeepSeek Harness Web GUI 插件全家桶 + 皮肤集合。皮肤是纯资产目录（packages/skins/skin-center/skins/<id>），由皮肤中心包统一加载。",
+  "name": "@mikulo/dsh-ssh",
+  "description": "Remote SSH operations for the dsh web GUI: host config store (~/.dsh/dsh-ssh.json, import from ~/.ssh/config), a persistent ssh2 connection pool with jump-host support, exec / PTY web terminal / SFTP transfer / local port-forward tunnels / cluster execution, plus agent tools (ssh_list, ssh_exec, ssh_upload, ssh_download, ssh_tunnel, ssh_cluster). Standalone plugin installed with `dsh plugin --profile <name> add github:mikulo/dsh-ssh`; no dsh source changes.",
+  "version": "0.4.0",
+  "icon": "icon.svg",
+  "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./invariant": {
+      "types": "./lib/types/invariant.d.ts",
+      "default": "./lib/invariant.js"
+    },
+    "./client": {
+      "types": "./lib/types/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
   "dsh": {
+    "engines": {
+      "dsh": ">=0.1.7-alpha.1"
+    },
     "bundle": {
-      "patch": "./packages/dsh-web-all/cordis.patch.yml"
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ],
+      "platform": "web"
     }
   },
-  "files": [
-    "package.json",
-    "packages/dsh-web-all/cordis.patch.yml"
-  ],
-  "dependencies": {
-    "@linxin666/dsh-web-all": "0.3.24"
-  },
   "scripts": {
-    "build": "pnpm -r build",
-    "dev:watch": "node scripts/dev-watch.mjs",
-    "test": "pnpm -r test",
-    "test:desktop": "node --test desktop/tests/*.test.mjs",
-    "test:standards": "node scripts/test-standards.mjs --check",
-    "test:standards:write": "node scripts/test-standards.mjs --write-baseline",
-    "typecheck": "pnpm -r typecheck",
-    "aggregate:check": "node scripts/aggregate.mjs --check",
-    "skin-center:check": "node scripts/skin-center-catalog-check --check",
-    "skin-hooks:generate": "node scripts/skin-hooks-registry.mjs",
-    "skin-hooks:check": "node scripts/skin-hooks-registry.mjs --check",
-    "community:check": "node scripts/community-index --check",
-    "runtime-deps:check": "node scripts/runtime-deps-check.mjs",
-    "libs:check": "node scripts/lib-artifact-check.mjs",
-    "libs:write": "node scripts/lib-artifact-check.mjs --write",
-    "i18n:check": "node scripts/i18n-audit.mjs --check",
-    "emoji:check": "node scripts/emoji-audit.mjs",
-    "test:scripts": "node --test scripts/*.test.mjs",
-    "test:mount": "bash scripts/e2e-mount.sh",
-    "coverage:check": "node scripts/coverage-gate.mjs",
-    "coverage:write": "node scripts/coverage-gate.mjs --write-baseline",
-    "skin:new": "node scripts/dsh-skin-new",
-    "pr:review": "node scripts/pr-review.mjs",
-    "docs:check": "node scripts/verify-docs.mjs",
-    "docs:list": "node scripts/verify-docs.mjs --list",
-    "docs:write-pair": "node scripts/verify-docs.mjs --write",
-    "sync-shared": "node scripts/sync-shared.mjs",
-    "sync-shared:check": "node scripts/sync-shared.mjs --check",
-    "market:build": "node scripts/market-build",
-    "market:check": "node scripts/market-build --check",
-    "deploy:market": "node scripts/deploy-market"
+    "build": "tsc -p tsconfig.build.json && tsdown",
+    "bundle": "tsdown",
+    "watch": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.4",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "ssh2": "^1.17.0",
+    "ws": "^8.18.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh": ">=0.1.7-alpha.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.4",
-    "@deepseek-ai/dsh-agent": "^0.1.7-alpha.2",
-    "@deepseek-ai/dsh-api-session-controller": "^0.1.7-alpha.2",
-    "@deepseek-ai/dsh-brand": "^0.1.7-alpha.2",
+    "@deepseek-ai/dsh-client-connection": "^0.1.7-alpha.2",
+    "@deepseek-ai/dsh-client-locale": "^0.1.7-alpha.2",
+    "@deepseek-ai/dsh-client-ui-renderer": "^0.1.7-alpha.2",
+    "@deepseek-ai/dsh-client-ui-settings": "^0.1.7-alpha.2",
+    "@deepseek-ai/dsh-client-ui-slots": "^0.1.7-alpha.2",
+    "@deepseek-ai/dsh-host-webserver": "^0.1.7-alpha.2",
     "@deepseek-ai/dsh-llm": "^0.1.7-alpha.2",
-    "@deepseek-ai/dsh-sandbox": "^0.1.7-alpha.2",
+    "@deepseek-ai/dsh-sandbox": "0.1.7-alpha.2",
     "@deepseek-ai/dsh-scope": "^0.1.7-alpha.2",
-    "@deepseek-ai/dsh-session": "^0.1.7-alpha.2",
     "@deepseek-ai/dsh-settings": "^0.1.7-alpha.2",
-    "@deepseek-ai/dsh-subagent": "^0.1.7-alpha.2",
+    "@deepseek-ai/dsh-system-prompt": "^0.1.7-alpha.2",
     "@deepseek-ai/dsh-timeout": "^0.1.7-alpha.2",
     "@deepseek-ai/dsh-tools": "^0.1.7-alpha.2",
-    "@deepseek-ai/dsh-typert-protocol": "^0.1.7-alpha.2",
-    "@deepseek-ai/dsh-util-crypto": "^0.1.7-alpha.2",
-    "@deepseek-ai/dsh-util-time": "^0.1.7-alpha.2",
-    "@deepseek-ai/dsh-util-values": "^0.1.7-alpha.2",
-    "@deepseek-ai/dsh-web-frontend": "^0.1.7-alpha.2",
-    "@deepseek-ai/dsh-workspace": "^0.1.7-alpha.2",
-    "@deepseek-ai/schemastery": "^3.18.4",
-    "@playwright/test": "^1.62.1",
-    "@vitest/coverage-v8": "^4.1.8",
+    "@types/node": "^22.20.0",
+    "@types/react": "~18.3.1",
+    "@types/react-dom": "^18.3.5",
+    "@types/ssh2": "^1.15.5",
+    "@types/ws": "^8.5.13",
+    "@vitest/coverage-v8": "^4.1.11",
+    "jsdom": "^25.0.0",
     "lightningcss": "^1.32.0",
-    "playwright": "^1.62.1",
-    "tsdown": "^0.22.2"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsdown": "0.22.2",
+    "typescript": "~5.7.2",
+    "vitest": "^4.1.11"
   },
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.js.map",
+    "lib/**/*.d.ts",
+    "lib/**/*.d.ts.map",
+    "src",
+    "cordis.patch.yml",
+    "README.md",
+    "icon.svg"
+  ],
   "license": "Apache-2.0",
-  "packageManager": "pnpm@11.24.0"
+  "homepage": "https://github.com/mikulo/dsh-ssh#readme",
+  "bugs": {
+    "url": "https://github.com/mikulo/dsh-ssh/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikulo/dsh-ssh.git"
+  }
 }
