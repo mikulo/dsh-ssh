@@ -24,9 +24,19 @@ export async function cluster(engine: PoolEngine, options: ClusterOptions): Prom
     throw new Error('ssh_cluster requires aliases, environment, or tags to limit the target set')
   }
 
-  let targets = engine.store.list()
+  const all = engine.store.list()
+  let targets = all
+  // Aliases the caller named but the store does not know: surface each as a
+  // failed row instead of silently dropping it, so a typo never reads as
+  // "every host succeeded".
+  const missing: ClusterResult[] = []
   if (options.aliases !== undefined && options.aliases.length > 0) {
-    targets = targets.filter(entry => options.aliases!.includes(entry.alias))
+    const requested = [...new Set(options.aliases.filter(alias => typeof alias === 'string').map(alias => alias.trim()).filter(alias => alias !== ''))]
+    const known = new Set(all.map(entry => entry.alias))
+    for (const alias of requested) {
+      if (!known.has(alias)) missing.push({ alias, ok: false, error: 'alias \'' + alias + '\' not found — add it first' })
+    }
+    targets = targets.filter(entry => requested.includes(entry.alias))
   }
   if (options.environment !== undefined && options.environment !== '') {
     targets = targets.filter(entry => entry.environment === options.environment)
@@ -35,12 +45,12 @@ export async function cluster(engine: PoolEngine, options: ClusterOptions): Prom
     // ALL semantics (matches the ssh_cluster tool description).
     targets = targets.filter(entry => options.tags!.every(tag => entry.tags.includes(tag)))
   }
-  if (targets.length === 0) return []
   if (options.maxWorkers !== undefined && (!Number.isInteger(options.maxWorkers) || options.maxWorkers < 1)) {
     throw new Error('maxWorkers must be a positive integer')
   }
+  if (targets.length === 0) return missing
   const workers = Math.min(engine.opts.defaultMaxWorkers, options.maxWorkers ?? engine.opts.defaultMaxWorkers, targets.length)
-  const results: ClusterResult[] = []
+  const results: ClusterResult[] = [...missing]
   const queue = [...targets]
   const run = async (): Promise<void> => {
     while (queue.length > 0) {

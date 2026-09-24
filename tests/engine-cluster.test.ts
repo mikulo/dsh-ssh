@@ -68,6 +68,24 @@ describe('cluster', () => {
     await expect(cluster(engine, { command: 'true', aliases: ['x'], maxWorkers: -1 })).rejects.toThrow(/maxWorkers/)
   })
 
+  it('runs known aliases and reports unknown ones as failed without executing them', async () => {
+    const engine = fakeEngine([{ alias: 'x', tags: [] }, { alias: 'y', tags: [] }])
+    const results = await cluster(engine, { command: 'true', aliases: ['x', 'typo', 'y'] })
+    expect(results).toHaveLength(3)
+    expect(execCommandMock).toHaveBeenCalledTimes(2)
+    expect(execCommandMock.mock.calls.map(call => call[1]).sort()).toEqual(['x', 'y'])
+    const typo = results.find(result => result.alias === 'typo')
+    expect(typo).toEqual({ alias: 'typo', ok: false, error: 'alias \'typo\' not found — add it first' })
+    expect(results.filter(result => result.ok).map(result => result.alias).sort()).toEqual(['x', 'y'])
+  })
+
+  it('still reports unknown aliases when the other filters exclude every known host', async () => {
+    const engine = fakeEngine([{ alias: 'x', environment: 'prod', tags: [] }])
+    const results = await cluster(engine, { command: 'true', aliases: ['x', 'typo'], environment: 'staging' })
+    expect(results).toEqual([{ alias: 'typo', ok: false, error: 'alias \'typo\' not found — add it first' }])
+    expect(execCommandMock).not.toHaveBeenCalled()
+  })
+
   it('captures per-host failures as failed results', async () => {
     execCommandMock.mockRejectedValue(new Error('boom'))
     const engine = fakeEngine([{ alias: 'x', tags: [] }, { alias: 'y', tags: [] }])

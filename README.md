@@ -15,7 +15,7 @@ Built on the capability list of [badseal/ssh-skill](https://github.com/badseal/s
 | Web terminal | xterm.js + WebSocket PTY terminal, auto-sizing, real-time output |
 | File transfer | SFTP upload (browser file picker, NDJSON progress stream), download (progress bar + browser save); remote directory browsing |
 | Port forwarding | Local port-forward tunnel (listens on 127.0.0.1 only) to reach a remote database / intranet service; list / stop supported |
-| Cluster execution | One command run concurrently across many hosts (filter by alias / environment / tag, default concurrency 8) |
+| Cluster execution | One command run concurrently across many hosts (filter by alias / environment / tag, default concurrency 8); per-host stdout / stderr is returned, and unknown aliases are reported as failed rather than skipped |
 | Agent tools | `ssh_list` / `ssh_exec` / `ssh_upload` / `ssh_download` / `ssh_tunnel` / `ssh_cluster`; GUI and Agent share the same host config |
 
 The panel loads its contents on first open. Closing and reopening it preserves the selected tab, form drafts and terminal session. The tunnel list refreshes every five seconds while its tab, panel and browser page are visible; automatic reads pause when hidden, resume immediately on return, and do not overlap slow reads. Port forwarding itself continues in the Host.
@@ -42,7 +42,7 @@ This repository is a **standalone single plugin** split out of the [zhu109009365
 dsh plugin --profile <profile> add github:mikulo/dsh-ssh
 
 # Pin a version (tag or commit)
-dsh plugin --profile <profile> add github:mikulo/dsh-ssh#v0.4.0
+dsh plugin --profile <profile> add github:mikulo/dsh-ssh#v0.4.1
 
 # Update to the latest commit on main
 dsh plugin --profile <profile> update @mikulo/dsh-ssh

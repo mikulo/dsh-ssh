@@ -248,6 +248,38 @@ describe('ssh_cluster', () => {
     expect(validTags).toEqual({ results: [] })
   })
 
+  it('renders a tally plus per-host stdout, stderr and errors', () => {
+    const tool = sshClusterTool(engine(new StubEngine()))
+    const text = render(tool, {
+      results: [
+        { alias: 'web-01', ok: true, exitCode: 0, timedOut: false, stdout: 'web-01\nfile.txt\n', stderr: '', durationMs: 12 },
+        { alias: 'web-02', ok: false, exitCode: 7, timedOut: false, stdout: '', stderr: 'boom\n', durationMs: 8 },
+        { alias: 'web-03', ok: false, exitCode: null, timedOut: true, stdout: 'partial', stderr: '', durationMs: 2000 },
+        { alias: 'typo', ok: false, error: 'alias \'typo\' not found — add it first' },
+      ],
+    })
+    expect(text).toBe([
+      '4 host(s): 1 ok, 2 failed, 1 timed out',
+      '',
+      '=== web-01: ok [exit code: 0] (12 ms)',
+      'stdout:',
+      'web-01',
+      'file.txt',
+      '',
+      '=== web-02: failed [exit code: 7] (8 ms)',
+      'stderr:',
+      'boom',
+      '',
+      '=== web-03: timed out [exit code: null] (2000 ms)',
+      'stdout:',
+      'partial',
+      '',
+      '=== typo: failed [exit code: null]',
+      'error: alias \'typo\' not found — add it first',
+    ].join('\n'))
+    expect(render(tool, { results: [] })).toBe('no hosts matched')
+  })
+
   it('documents selector requirement in tool and parameter descriptions', () => {
     const tool = sshClusterTool(engine(new StubEngine()))
     expect(tool.description).toContain('at least one aliases, environment, or tags filter is required')

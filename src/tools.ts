@@ -72,14 +72,28 @@ function renderExec(result: ExecResult): string {
   return parts.join('\n')
 }
 
-/** Render cluster outcomes compactly. */
+/**
+ * Render cluster outcomes: a one-line tally, then one block per host with its
+ * status line followed by stdout / stderr (the same labels as ssh_exec), so
+ * the agent sees what each host actually printed.
+ */
 function renderCluster(results: ClusterResult[]): string {
   if (results.length === 0) return 'no hosts matched'
-  return results.map(result => {
+  const okCount = results.filter(result => result.ok).length
+  const timedOutCount = results.filter(result => !result.ok && result.timedOut === true).length
+  const failedCount = results.length - okCount - timedOutCount
+  const tally = [`${okCount} ok`, `${failedCount} failed`]
+  if (timedOutCount > 0) tally.push(`${timedOutCount} timed out`)
+  const blocks = results.map(result => {
     const status = result.ok ? 'ok' : result.timedOut === true ? 'timed out' : 'failed'
-    const tail = result.error !== undefined ? ' (' + result.error + ')' : ''
-    return `${result.alias}: ${status} [exit code: ${result.exitCode ?? 'null'}]${tail}`
-  }).join('\n')
+    const duration = result.durationMs !== undefined ? ` (${result.durationMs} ms)` : ''
+    const lines = [`=== ${result.alias}: ${status} [exit code: ${result.exitCode ?? 'null'}]${duration}`]
+    if (result.stdout !== undefined && result.stdout !== '') lines.push('stdout:\n' + result.stdout.replace(/\n$/, ''))
+    if (result.stderr !== undefined && result.stderr !== '') lines.push('stderr:\n' + result.stderr.replace(/\n$/, ''))
+    if (result.error !== undefined) lines.push('error: ' + result.error)
+    return lines.join('\n')
+  })
+  return `${results.length} host(s): ${tally.join(', ')}\n\n` + blocks.join('\n\n')
 }
 
 /** One tunnel line. */

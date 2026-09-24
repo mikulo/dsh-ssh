@@ -15,7 +15,7 @@
 | Web 终端 | xterm.js + WebSocket PTY 终端，自适应尺寸，实时输出 |
 | 文件传输 | SFTP 上传（浏览器选文件，NDJSON 进度流）、下载（进度条 + 浏览器保存）；远程目录浏览 |
 | 端口转发 | 本地端口转发隧道（仅监听 127.0.0.1），访问远程数据库 / 内网服务，支持列表 / 停止 |
-| 集群执行 | 一条命令并发跑多台主机（按别名 / 环境 / 标签过滤，默认并发 8） |
+| 集群执行 | 一条命令并发跑多台主机（按别名 / 环境 / 标签过滤，默认并发 8）；逐台返回 stdout / stderr，未配置的别名会标记为失败而不是被静默跳过 |
 | Agent 工具 | `ssh_list` / `ssh_exec` / `ssh_upload` / `ssh_download` / `ssh_tunnel` / `ssh_cluster`，GUI 与 Agent 共享同一份主机配置 |
 
 面板在首次打开时加载内容。关闭后重新打开会保留选中的页签、表单草稿和终端会话。隧道列表仅在隧道页签、面板和浏览器页面都可见时每五秒刷新；隐藏时暂停自动查询，恢复可见时立即刷新，慢查询期间不叠加请求。端口转发本身继续在 Host 中运行。
@@ -42,7 +42,7 @@
 dsh plugin --profile <profile> add github:mikulo/dsh-ssh
 
 # 安装指定版本（tag 或 commit）
-dsh plugin --profile <profile> add github:mikulo/dsh-ssh#v0.4.0
+dsh plugin --profile <profile> add github:mikulo/dsh-ssh#v0.4.1
 
 # 升级到 main 分支最新提交
 dsh plugin --profile <profile> update @mikulo/dsh-ssh

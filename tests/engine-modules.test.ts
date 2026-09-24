@@ -154,9 +154,15 @@ describe('tunnel', () => {
 })
 
 describe('cluster', () => {
-  it('returns an empty list when no host matches', async () => {
+  it('returns an empty list when no configured host matches the filters', async () => {
     const engine = fakeEngine([{ alias: 'a', environment: 'prod', tags: ['web'] }])
-    const results = await cluster(engine, { command: 'true', aliases: ['missing'] })
-    expect(results).toEqual([])
+    expect(await cluster(engine, { command: 'true', environment: 'staging' })).toEqual([])
+    expect(await cluster(engine, { command: 'true', aliases: ['a'], tags: ['db'] })).toEqual([])
+  })
+
+  it('reports unknown aliases as failed rows instead of dropping them', async () => {
+    const engine = fakeEngine([{ alias: 'a', environment: 'prod', tags: ['web'] }])
+    const results = await cluster(engine, { command: 'true', aliases: ['missing', ' missing ', 'missing'] })
+    expect(results).toEqual([{ alias: 'missing', ok: false, error: 'alias \'missing\' not found — add it first' }])
   })
 })
